@@ -1,0 +1,50 @@
+---
+title: "Aufgabe_3"
+author: "windijon"
+date: '2022-05-06'
+output: html_document
+---
+
+
+### Task 1: Segmentation
+
+Load the necessary libraries.
+
+```{r}
+
+library(readr)        # to import tabular data (e.g. csv)
+library(dplyr)        # to manipulate (tabular) data
+library(ggplot2)      # to visualize data
+library(sf)           # to handle spatial vector data
+library(terra)        # To handle raster data
+library(lubridate)    # To handle dates and times
+library(zoo)          # to handle Rolling window functions
+
+```
+
+Import the wild-boar data "caro60" as csv.
+
+```{r}
+
+caro60 <- read_delim("caro60.csv",",")
+View(caro60)
+
+```
+
+Create a temporal window of 6 minutes.
+
+```{r}
+
+seq_6 <- seq(from = 1, to = nrow(caro60), by = 6)
+caro_6 <- slice(.data = caro60, n = seq_6)
+View(caro_6)
+
+caro_6 <- caro_6 %>%
+  mutate(caro_6,timelag_min = as.integer(difftime(time1 = lead(DatetimeUTC), time2 = DatetimeUTC), units = "min"))
+View(caro_6) 
+
+plot(x = caro60$E,y = caro60$N, type = "p", pch = 16)
+plot(x = caro_6$E,y = caro_6$N, type = "p", pch = 16)
+
+```
+
