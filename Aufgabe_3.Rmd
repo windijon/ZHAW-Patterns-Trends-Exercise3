@@ -81,8 +81,24 @@ summary(object = caro_6$steplength_m)
 mean(caro_6$steplength_m, na.rm = T)
 
 caro_6 <- caro_6 %>%
-  mutate(static = steplength_m <=mean(caro_6$steplength_m, na.rm = T))
+  mutate(static = steplength_m <= mean(caro_6$steplength_m, na.rm = T))
 View(caro_6)
+
+```
+
+
+### Task 3: Visualize segmented trajectories
+
+Visualize the segmented trajectory spatially.
+
+```{r}
+
+ggplot(data = caro_6, aes(x = E, y = N, color = static)) +
+  geom_path(color = "grey") +
+  geom_point() +
+  labs(y = "East", x = "North", colour = "Static Movement") +
+  ggtitle("Movement of the Wild-Boar 'Caro' at 15.09.2015") +
+  theme_minimal()
 
 ```
 
