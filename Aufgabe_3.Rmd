@@ -48,3 +48,41 @@ plot(x = caro_6$E,y = caro_6$N, type = "p", pch = 16)
 
 ```
 
+
+### Task 2: Specify and apply threshold
+
+Calculating the Euclidean distances (step-length).
+
+```{r}
+
+caro_6 <- caro_6 %>%
+  mutate(steplength_m = sqrt((E-lead(E,1))^2 + (N-lead(N,1))^2))
+View(caro_6)
+
+```
+
+Explore these step-lengths.
+
+```{r}
+
+histogram <- ggplot(data = caro_6, aes(x = steplength_m)) +
+  geom_histogram(bins = 100) +
+  labs(y = "Count", x = "Step-Length [m]") +
+  theme_minimal()
+histogram
+
+boxplot <- ggplot(data = caro_6, aes(x = steplength_m, y = TierName)) +
+  geom_boxplot() +
+  labs(y = "", x = "Step-Length [m]") +
+  theme_minimal()
+boxplot
+
+summary(object = caro_6$steplength_m)
+mean(caro_6$steplength_m, na.rm = T)
+
+caro_6 <- caro_6 %>%
+  mutate(static = steplength_m <=mean(caro_6$steplength_m, na.rm = T))
+View(caro_6)
+
+```
+
