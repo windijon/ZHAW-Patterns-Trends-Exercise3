@@ -150,7 +150,7 @@ plot_moving_segments_all <- ggplot(data = caro_filter_1, aes(x = E, y = N, color
   geom_path(color = "grey") +
   geom_point() +
   labs(y = "East", x = "North", colour = "Segment ID") +
-  ggtitle("Moving Segments of the Wild-Boar 'Caro' at 15.09.2015 (All Segments)") +
+  ggtitle("Moving Segments (all) of the Wild-Boar 'Caro' at 15.09.2015") +
   coord_fixed() +
   theme_minimal()
 plot_moving_segments_all
@@ -174,12 +174,47 @@ plot_moving_segments_long <- ggplot(data = caro_filter_2, aes(x = E, y = N, colo
   geom_path(color = "grey") +
   geom_point() +
   labs(y = "East", x = "North", colour = "Segment ID") +
-  ggtitle("Moving Segments of the Wild-Boar 'Caro' at 15.09.2015 (Long Segments)") +
+  ggtitle("Moving Segments (long) of the Wild-Boar 'Caro' at 15.09.2015") +
   coord_fixed() +
   theme_minimal()
 plot_moving_segments_long
 
 ggsave(plot = plot_moving_segments_long, filename = "Moving_Segments_long.pdf", width = 17, height = 14, units = "cm", dpi = 5000)
+
+```
+
+### Task 5: Similarity measures
+
+Import the human movement data "pedestrian" as csv.
+
+```{r}
+
+pedestrian <- read_delim("pedestrian.csv",",")
+View(pedestrian)
+
+```
+
+Explore the data.
+
+```{r}
+
+plot_pedestrian <- ggplot(pedestrian, aes(E, N, color = DatetimeUTC)) +
+  geom_path() + 
+  geom_point() + 
+  facet_wrap(~TrajID) +
+  labs(y = "East", x = "North", colour = "Time", title = "Visual comparison of  6 trajectories 01.03.2015", subtitle = "Each subplot highlights a unique pedestrian trajectories") +
+  scale_x_continuous(labels = dollar_format(big.mark = "'", prefix = "")) +
+  scale_y_continuous(labels = dollar_format(big.mark = "'", prefix = "")) +  coord_fixed() +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 25), plot.subtitle = element_text(size = 15)) +
+  guides(colour = guide_colourbar(reverse = TRUE))
+plot_pedestrian
+
+ggsave(plot = plot_pedestrian, filename = "Pedestrian.pdf", width = 17, height = 14, units = "cm", dpi = 5000)
+
+pedestrian %>% 
+  group_by(TrajID) %>% 
+  summarise(sample_size = n())
 
 ```
 
