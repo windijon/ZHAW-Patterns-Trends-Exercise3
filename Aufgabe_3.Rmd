@@ -19,6 +19,7 @@ library(sf)           # to handle spatial vector data
 library(terra)        # To handle raster data
 library(lubridate)    # To handle dates and times
 library(zoo)          # to handle Rolling window functions
+library(scales)       # to handle thousands separator
 
 ```
 
