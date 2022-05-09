@@ -201,12 +201,12 @@ Explore the data.
 plot_pedestrian <- ggplot(pedestrian, aes(E, N, color = DatetimeUTC)) +
   geom_path() + 
   geom_point() + 
-  facet_wrap(~TrajID) +
+  facet_wrap(~TrajID, nrow = 2) +
   labs(y = "East", x = "North", colour = "Time", title = "Visual comparison of  6 trajectories 01.03.2015", subtitle = "Each subplot highlights a unique pedestrian trajectories") +
-  scale_x_continuous(labels = dollar_format(big.mark = "'", prefix = "")) +
+  scale_x_continuous(labels = dollar_format(big.mark = "'", prefix = ""), breaks = c(2569500, 2571000)) +
   scale_y_continuous(labels = dollar_format(big.mark = "'", prefix = "")) +  coord_fixed() +
   theme_minimal() +
-  theme(plot.title = element_text(size = 25), plot.subtitle = element_text(size = 15)) +
+  theme(plot.title = element_text(size = 15), plot.subtitle = element_text(size = 10)) +
   guides(colour = guide_colourbar(reverse = TRUE))
 plot_pedestrian
 
@@ -218,3 +218,65 @@ pedestrian %>%
 
 ```
 
+Trajectory 3 moved reverse. Trajectory 5 has an outlier and 4 has a differing shape.
+Point density between the trajectories varies and indicate differences in speed.
+
+
+### Task 6: Calculate similarity
+
+Install Library "SimilarityMeasures" & "tidyr".
+
+```{r}
+
+library(SimilarityMeasures)
+library(tidyr)
+
+```
+
+Now compare trajectory 1 to trajectories 2-6 using different similarity measures (DTW, EditDist, Frechet and LCSS).
+
+```{r}
+
+similarity_measures <- NULL
+
+for (i in 2:6) {
+  trj_1 <- pedestrian %>%
+    filter(TrajID == 1) %>%
+    select(E, N) %>%
+    as.matrix()
+  
+  trj_2 <- pedestrian %>%
+    filter(TrajID == i) %>%
+    select(E, N) %>%
+    as.matrix()
+  
+  DTW <- DTW(trj_1, trj_2)
+  EditDist <- EditDist(trj_1, trj_2)
+  Frechet <- Frechet(trj_1, trj_2)
+  LCSS <- LCSS(trj_1, trj_2, errorMarg = 15)
+  
+  similarity_measures <- rbind(similarity_measures, data.frame(i, DTW, EditDist, Frechet, LCSS))
+}
+
+similarity_measures
+
+```
+
+Visualize the results.
+
+```{r}
+
+similarity_measures <- pivot_longer(data = similarity_measures,cols = 2:5, names_to ="Method", values_to = "Value")
+
+plot_similarity_measures <- ggplot(similarity_measures, aes(i, Value, fill = i)) +
+  geom_col() + facet_wrap(~Method, scales = "free") +
+  labs(y = "Value", x = "Comparison trajectory", title = "Computed similarities using different measures \nbetween trajectory 1 to all other trajectories") +
+  scale_y_continuous(labels = dollar_format(big.mark = "'", prefix = "")) + 
+  theme_minimal() + 
+  theme(plot.title = element_text(size = 15), plot.subtitle = element_text(size = 10)) +
+  theme(legend.position="none")
+plot_similarity_measures
+
+ggsave(plot = plot_similarity_measures, filename = "Similarity_Measures.pdf", width = 17, height = 14, units = "cm", dpi = 5000)
+
+```
