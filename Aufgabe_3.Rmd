@@ -10,7 +10,7 @@ output: html_document
 
 Load the necessary libraries.
 
-```{r}
+```{r message = FALSE}
 
 library(readr)        # to import tabular data (e.g. csv)
 library(dplyr)        # to manipulate (tabular) data
@@ -25,16 +25,16 @@ library(scales)       # to handle thousands separator
 
 Import the wild-boar data "caro60" as csv.
 
-```{r}
+```{r message = FALSE}
 
 caro <- read_delim("caro60.csv",",")
-View(caro)
+caro
 
 ```
 
 Create a temporal window of 6 minutes and calculating the Euclidean Distances (step-length).
 
-```{r}
+```{r message = FALSE}
 
 caro <- caro %>% 
   mutate(
@@ -45,13 +45,13 @@ caro <- caro %>%
     nPlus2  = sqrt((E-lead(E,2))^2 + (N-lead(N,2))^2),  
     nPlus3  = sqrt((E-lead(E,3))^2 + (N-lead(N,3))^2)  
 )
-View(caro)
+caro
 
 caro <- caro %>% 
   rowwise() %>% 
   mutate(stepMean = mean(c(nMinus3, nMinus2, nMinus1, nPlus1, nPlus2, nPlus3))) %>% 
   ungroup()
-View(caro)
+caro
 
 ```
 
@@ -60,7 +60,7 @@ View(caro)
 
 Explore the step-lengths and specify the threshold.
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 histogram <- ggplot(data = caro, aes(x = stepMean)) +
   geom_histogram(bins = 200) +
@@ -86,12 +86,12 @@ mean(caro$stepMean, na.rm = T)
 
 Apply the threshold.
 
-```{r}
+```{r message = FALSE}
 
 caro <- caro %>%
   ungroup() %>% 
   mutate(static = stepMean <= mean(x = caro$stepMean, na.rm = T))
-View(caro)
+caro
 
 ```
 
@@ -100,7 +100,7 @@ View(caro)
 
 Visualize the segmented trajectory spatially.
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 plot_static_movement <- ggplot(data = caro, aes(x = E, y = N, color = static)) +
   geom_path(color = "grey") +
@@ -120,7 +120,7 @@ ggsave(plot = plot_static_movement, filename = "Static_Movement.pdf", width = 17
 
 Function to create unique ID for each segment.
 
-```{r}
+```{r message = FALSE}
 
 rle_id <- function(vec){
   x <- rle(vec)$lengths
@@ -131,21 +131,21 @@ rle_id <- function(vec){
 
 Assign unique IDs based on the column "static".
 
-```{r}
+```{r message = FALSE}
 
 caro <- caro %>%
   mutate(segment_id = rle_id(static))
-View(caro)
+caro
 
 ```
 
 Visualize the moving segments (all segments).
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 caro_filter_1 <- caro %>%
   filter(!static)
-View(caro_filter_1)
+caro_filter_1
 
 plot_moving_segments_all <- ggplot(data = caro_filter_1, aes(x = E, y = N, color = segment_id)) +
   geom_path(color = "grey") +
@@ -162,14 +162,14 @@ ggsave(plot = plot_moving_segments_all, filename = "Moving_Segments_all.pdf", wi
 
 Visualize the moving segments (only long segments, < 5 minutes).
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 caro_filter_2 <- caro %>% 
   filter(!static) %>% 
   group_by(segment_id) %>% 
   mutate(duration = as.integer(difftime(max(DatetimeUTC),min(DatetimeUTC), units = "mins"))) %>%
   filter(duration > 5)
-View(caro_filter_2)
+caro_filter_2
 
 plot_moving_segments_long <- ggplot(data = caro_filter_2, aes(x = E, y = N, color = segment_id)) +
   geom_path(color = "grey") +
@@ -188,16 +188,16 @@ ggsave(plot = plot_moving_segments_long, filename = "Moving_Segments_long.pdf", 
 
 Import the human movement data "pedestrian" as csv.
 
-```{r}
+```{r message = FALSE}
 
 pedestrian <- read_delim("pedestrian.csv",",")
-View(pedestrian)
+pedestrian
 
 ```
 
 Explore the data.
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 plot_pedestrian <- ggplot(pedestrian, aes(E, N, color = DatetimeUTC)) +
   geom_path() + 
@@ -227,7 +227,7 @@ Point density between the trajectories varies and indicate differences in speed.
 
 Install Library "SimilarityMeasures" & "tidyr".
 
-```{r}
+```{r message = FALSE}
 
 library(SimilarityMeasures)
 library(tidyr)
@@ -236,7 +236,7 @@ library(tidyr)
 
 Now compare trajectory 1 to trajectories 2-6 using different similarity measures (DTW, EditDist, Frechet and LCSS).
 
-```{r}
+```{r message = FALSE}
 
 similarity_measures <- NULL
 
@@ -265,7 +265,7 @@ similarity_measures
 
 Visualize the results.
 
-```{r}
+```{r message = FALSE, warning=FALSE}
 
 similarity_measures <- pivot_longer(data = similarity_measures,cols = 2:5, names_to ="Method", values_to = "Value")
 
